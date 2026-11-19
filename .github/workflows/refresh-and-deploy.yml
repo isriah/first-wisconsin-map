@@ -1,0 +1,62 @@
+name: Refresh data and deploy
+
+on:
+  schedule:
+    - cron: "17 9 * * *" # every night, about 3-4 am Central
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # If the FIRST search is down or returns nonsense, the page keeps the last good data.
+      - name: Refresh team and event data
+        id: refresh
+        continue-on-error: true
+        run: node scripts/build-data.mjs
+
+      - name: Commit refreshed data
+        if: steps.refresh.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/data.json
+          git diff --cached --quiet || (git commit -m "Refresh FIRST team and event data" && git push)
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Report a failed refresh
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo "::error::The data refresh failed; the site was deployed with the previous data."
+          exit 1
+
+  deploy:
+    needs: build
+    if: always() && needs.build.result != 'cancelled'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

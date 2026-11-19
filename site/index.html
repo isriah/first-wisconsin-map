@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FIRST in Wisconsin: teams, goals and events by region</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&amp;family=Roboto+Condensed:wght@700&amp;display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="strip" aria-hidden="true"><span></span><span></span><span></span></div>
+<header class="page-header" id="page-header">
+<h1><i>FIRST</i><sup>®</sup> in Wisconsin</h1>
+<p>Teams and events for <i>FIRST</i>® LEGO® League (FLL), <i>FIRST</i> Tech Challenge (FTC) and <i>FIRST</i> Robotics Competition (FRC). Select a region to see its goals, events and champion.</p>
+</header>
+<main class="layout">
+<section class="map-col" aria-label="Map">
+<div class="map" id="map"></div>
+<div class="legend">
+<label class="check"><input type="checkbox" id="pins-toggle" checked>Show upcoming events</label>
+<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="pin pin-fll"></circle></svg>FLL</span>
+<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,0.5l5.5,5.5 -5.5,5.5 -5.5,-5.5z" class="pin pin-ftc"></path></svg>FTC</span>
+<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,1l5,10 -10,0z" class="pin pin-frc"></path></svg>FRC</span>
+<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" class="pin pin-other"></circle></svg>Other</span>
+</div>
+<p class="note">Thick black lines separate regions. Two shades of one color are two areas of the same region.</p>
+</section>
+<section class="panel" id="panel" aria-live="polite"><p class="note">Loading map data.</p></section>
+</main>
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

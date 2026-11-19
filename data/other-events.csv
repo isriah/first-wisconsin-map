@@ -1,0 +1,3 @@
+# Events you add by hand. date and end_date are YYYY-MM-DD. county places the event on the map.
+# program is optional: fll, ftc or frc; anything else is listed under "Other events".
+date,end_date,name,type,city,county,venue,program,url

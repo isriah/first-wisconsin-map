@@ -1,0 +1,10 @@
+{
+  "season": { "label": "2025-26", "fllFtcYear": 2025, "frcYear": 2026 },
+  "teamPrograms": { "fll": ["FLL", "JFLL", "FLL2"], "ftc": ["FTC"], "frc": ["FRC"] },
+  "eventPrograms": { "fll": ["FLL", "JFLL", "FLL2"], "ftc": ["FTC"], "frc": ["FRC"] },
+  "source": {
+    "teams": "https://es02.firstinspires.org/teams/_search",
+    "events": "https://es02.firstinspires.org/events/_search",
+    "counties": "https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/counties-10m.json"
+  }
+}

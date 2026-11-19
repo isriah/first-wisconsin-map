@@ -1,0 +1,27 @@
+{
+  // Cloudflare Worker settings. See README.md in this folder for what each value means.
+  "name": "first-wisconsin-map-contact",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+
+  // Keeps console.error output visible in the Cloudflare dashboard (Worker > Logs).
+  "observability": { "enabled": true },
+
+  // Non-secret settings. Replace the placeholder values before deploying.
+  "vars": {
+    // Verified sender. The domain must be verified with the email provider.
+    "FROM_EMAIL": "FIRST Wisconsin Map <map@example.org>",
+    // Comma-separated list of exact origins allowed to post the form (no paths, no trailing slash).
+    "ALLOWED_ORIGINS": "https://isriah.github.io",
+    // Only "resend" is supported at the moment.
+    "EMAIL_PROVIDER": "resend",
+    // Wix site id. Leave empty to skip adding visitors to Wix contacts.
+    "WIX_SITE_ID": ""
+  }
+
+  // Secrets are NOT stored in this file. Set them with `npx wrangler secret put <NAME>`:
+  //   CHAMPION_EMAILS   (required)  JSON: { "nel": "a@example.org", "default": "b@example.org" }
+  //   RESEND_API_KEY    (required)
+  //   TURNSTILE_SECRET  (optional)
+  //   WIX_API_KEY       (optional)
+}

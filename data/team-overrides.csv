@@ -1,0 +1,2 @@
+# Fixes for teams the ZIP code lookup puts in the wrong county, or cannot place.
+program,team_number,county

@@ -1,0 +1,13 @@
+# Champion shown for each region (or area). Names only: email addresses live in the Cloudflare Worker secret, never here.
+# PLACEHOLDERS: replace each name with the real champion.
+scope,name
+milwaukee,"Sample Champion (Milwaukee)"
+woww,"Sample Champion (WOWW Counties)"
+southshore,"Sample Champion (South Shore Corridor)"
+nel,"Sample Champion (Northeast & Lakeshore)"
+foxvalley,"Sample Champion (Fox Valley)"
+cnw,"Sample Champion (Central & Northwoods)"
+north,"Sample Champion (The Great North)"
+sevenrivers,"Sample Champion (Seven Rivers)"
+capital,"Sample Champion (Capital Region)"
+driftless,"Sample Champion (Driftless)"

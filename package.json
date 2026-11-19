@@ -1,0 +1,13 @@
+{
+  "name": "first-wisconsin-map",
+  "private": true,
+  "type": "module",
+  "description": "Interactive FIRST in Wisconsin engagement map (static page + contact relay Worker).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build:map": "node scripts/build-map.mjs",
+    "build:data": "node scripts/build-data.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "node --test worker/test/contact.test.mjs"
+  }
+}

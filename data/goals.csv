@@ -1,0 +1,15 @@
+# Team goals. scope is "state", a region id or an area id from config/regions.json.
+# Leave a cell empty when no goal is set. The statewide goal is the sum of the regions unless a "state" row gives one.
+# PLACEHOLDERS: these goals are made up so the progress bars render. Replace them with the real goals.
+scope,fll,ftc,frc
+state,,,
+milwaukee,90,32,20
+woww,165,32,18
+southshore,20,4,4
+nel,115,26,12
+foxvalley,50,6,8
+cnw,12,3,3
+north,16,4,11
+sevenrivers,22,10,9
+capital,80,20,8
+driftless,8,5,2

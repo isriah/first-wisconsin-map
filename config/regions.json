@@ -1,0 +1,78 @@
+{
+  "state": { "name": "Wisconsin", "abbr": "WI", "fips": "55" },
+  "regions": [
+    {
+      "id": "milwaukee",
+      "name": "Milwaukee",
+      "areas": [
+        { "id": "milwaukee", "name": "Milwaukee", "color": "#f28e2b", "counties": ["Milwaukee"] }
+      ]
+    },
+    {
+      "id": "woww",
+      "name": "WOWW Counties",
+      "areas": [
+        { "id": "woww", "name": "WOWW", "color": "#9c89c9", "counties": ["Ozaukee", "Washington", "Waukesha", "Walworth"] }
+      ]
+    },
+    {
+      "id": "southshore",
+      "name": "South Shore Corridor",
+      "areas": [
+        { "id": "southshore", "name": "South Shore", "color": "#e377a8", "counties": ["Racine", "Kenosha"] }
+      ]
+    },
+    {
+      "id": "nel",
+      "name": "Northeast & Lakeshore",
+      "areas": [
+        { "id": "lakeshore", "name": "Lakeshore", "color": "#2f8f88", "counties": ["Brown", "Door", "Kewaunee", "Manitowoc", "Calumet", "Sheboygan"] },
+        { "id": "northeast", "name": "Northeast", "color": "#9fd6d0", "counties": ["Marinette", "Oconto", "Florence", "Forest", "Menominee"] }
+      ]
+    },
+    {
+      "id": "foxvalley",
+      "name": "Fox Valley",
+      "areas": [
+        { "id": "foxvalley", "name": "Fox Valley", "color": "#59a14f", "counties": ["Winnebago", "Fond du Lac", "Outagamie", "Waupaca", "Waushara", "Shawano", "Green Lake", "Marquette"] }
+      ]
+    },
+    {
+      "id": "cnw",
+      "name": "Central & Northwoods",
+      "areas": [
+        { "id": "central", "name": "Central Wisconsin", "color": "#3f6fa8", "counties": ["Marathon", "Portage", "Wood", "Clark", "Adams", "Juneau"] },
+        { "id": "northwoods", "name": "Northwoods", "color": "#a9c6ea", "counties": ["Vilas", "Oneida", "Langlade", "Lincoln", "Price", "Taylor"] }
+      ]
+    },
+    {
+      "id": "north",
+      "name": "The Great North",
+      "areas": [
+        { "id": "chippewa", "name": "Chippewa Valley & St. Croix", "color": "#c4553b", "counties": ["Eau Claire", "Chippewa", "Dunn", "Barron", "Rusk", "Polk", "St. Croix", "Pierce", "Pepin"] },
+        { "id": "superior", "name": "Lake Superior", "color": "#f2a48f", "counties": ["Douglas", "Bayfield", "Ashland", "Iron", "Burnett", "Washburn", "Sawyer"] }
+      ]
+    },
+    {
+      "id": "sevenrivers",
+      "name": "Seven Rivers",
+      "areas": [
+        { "id": "sevenrivers", "name": "Seven Rivers", "color": "#a3b18a", "counties": ["La Crosse", "Monroe", "Trempealeau", "Jackson", "Buffalo", "Vernon"] }
+      ]
+    },
+    {
+      "id": "capital",
+      "name": "Capital Region",
+      "areas": [
+        { "id": "capital", "name": "Capital Region", "color": "#e6b23e", "counties": ["Dane", "Sauk", "Columbia", "Dodge", "Jefferson", "Green", "Rock"] }
+      ]
+    },
+    {
+      "id": "driftless",
+      "name": "Driftless",
+      "areas": [
+        { "id": "driftless", "name": "Driftless", "color": "#b07aa1", "counties": ["Grant", "Iowa", "Lafayette", "Crawford", "Richland"] }
+      ]
+    }
+  ]
+}
