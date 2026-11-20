@@ -45,19 +45,30 @@ a:hover { color: var(--blue-dark); }
 
 .layout { display: flex; flex-direction: column; gap: 24px; padding: 0 24px 28px; }
 .map-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.map svg { display: block; width: 100%; height: auto; max-width: 620px; margin: 0 auto; font: 9px var(--sans); }
+.map-wrap { position: relative; }
+.map svg { display: block; width: 100%; height: auto; max-width: 620px; margin: 0 auto; font: 9px var(--sans); --inv: 1; --lab: 1; }
+.map svg.zoomed { cursor: grab; }
+.map svg.dragging { cursor: grabbing; }
+.zoom { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--paper); }
+.zoom button { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; background: var(--paper); cursor: pointer; }
+.zoom button + button { border-top: 1px solid var(--line); }
+.zoom button:hover { background: var(--panel); }
+.zoom button[disabled] { cursor: default; opacity: 0.35; }
+.zoom svg { fill: none; stroke: var(--ink); stroke-width: 2px; }
 .panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .note { font-size: 13px; line-height: 1.2; color: var(--muted); }
 
 /* Map */
-.county { stroke: #fff; stroke-width: 1; stroke-linejoin: round; }
+.county { stroke: #fff; stroke-width: calc(1px * var(--inv)); stroke-linejoin: round; }
+.region.active .county:hover { filter: brightness(1.12); }
+.county-outline { fill: none; stroke: var(--ink); stroke-width: calc(3.5px * var(--inv)); stroke-linejoin: round; pointer-events: none; }
 .region { cursor: pointer; transition: opacity 0.15s; }
 .region:hover { filter: brightness(1.06); }
 .region:focus { outline: none; }
-.region:focus-visible .county { stroke: var(--ink); stroke-width: 2; }
+.region:focus-visible .county { stroke: var(--ink); stroke-width: calc(2px * var(--inv)); }
 .region.dim { opacity: 0.3; }
-.county-label { text-anchor: middle; fill: var(--ink); stroke: #fff; stroke-width: 2.4px; stroke-opacity: 0.85; paint-order: stroke; stroke-linejoin: round; pointer-events: none; }
-.mesh { fill: none; stroke: var(--ink); stroke-width: 2.5px; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.county-label { font-size: calc(9px * var(--lab)); dominant-baseline: central; text-anchor: middle; fill: var(--ink); stroke: #fff; stroke-width: calc(2.4px * var(--lab)); stroke-opacity: 0.85; paint-order: stroke; stroke-linejoin: round; pointer-events: none; }
+.mesh { fill: none; stroke: var(--ink); stroke-width: calc(2.5px * var(--inv)); stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
 .pins { pointer-events: none; }
 .pin { stroke: var(--ink); stroke-width: 1px; }
 .pin-fll { fill: var(--fll); }
@@ -158,6 +169,7 @@ legend { padding: 0; font-weight: 700; }
   .page-header { padding: 20px 16px 16px; }
   .layout { padding: 0 16px 24px; }
   .county-label { display: none; }
+  .zoomed-far .county-label { display: block; }
 }
 
 /* Wide frames: side by side. When the frame is tall enough the page fills it exactly and the panel scrolls inside. */
@@ -169,7 +181,8 @@ legend { padding: 0; font-weight: 700; }
   body { display: flex; flex-direction: column; overflow: hidden; }
   .layout { flex: 1; min-height: 0; align-items: stretch; }
   .map-col { min-height: 0; }
-  .map { flex: 1; min-height: 0; }
+  .map-wrap { flex: 1; min-height: 0; }
+  .map { height: 100%; }
   .map svg { height: 100%; max-width: none; }
   .panel { min-height: 0; overflow-y: auto; padding-right: 4px; }
 }

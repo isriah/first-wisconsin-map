@@ -10,7 +10,7 @@ const ROLES = ['Parent or guardian', 'Educator', 'Mentor or volunteer', 'Sponsor
 const mapEl = document.getElementById('map');
 const panel = document.getElementById('panel');
 const params = new URLSearchParams(location.search);
-const state = { region: null, view: 'overview', prog: 'all', pins: true, sending: false };
+const state = { region: null, county: null, view: 'overview', prog: 'all', pins: true, sending: false };
 let map;
 let data;
 let turnstileId = null;
@@ -48,34 +48,125 @@ function drawMap() {
   const groups = map.regions.map((r) => {
     const areas = r.areas.map((a) => `<g fill="${esc(a.color)}">${a.counties.map((c) => {
       const n = data.counties[c] ?? {};
-      return `<path class="county" d="${map.counties[c].d}"><title>${esc(c)} County: ${PROGRAMS.map((p) => `${p.label} ${n[p.id] ?? 0}`).join(', ')}</title></path>`;
+      return `<path class="county" data-county="${esc(c)}" d="${map.counties[c].d}"><title>${esc(c)} County: ${PROGRAMS.map((p) => `${p.label} ${n[p.id] ?? 0}`).join(', ')}</title></path>`;
     }).join('')}</g>`).join('');
-    const labels = r.areas.flatMap((a) => a.counties).map((c) => `<text class="county-label" x="${map.counties[c].x}" y="${map.counties[c].y + 3}">${esc(map.counties[c].label)}</text>`).join('');
+    const labels = r.areas.flatMap((a) => a.counties).map((c) => `<text class="county-label" data-short="${esc(map.counties[c].label)}" data-full="${esc(c)}" x="${map.counties[c].x}" y="${map.counties[c].y}">${esc(map.counties[c].label)}</text>`).join('');
     return `<g class="region" data-region="${esc(r.id)}" tabindex="0" role="button" aria-label="${esc(r.name)} region">${areas}${labels}</g>`;
   }).join('');
-  mapEl.innerHTML = `<svg viewBox="${map.viewBox.join(' ')}" role="group" aria-label="Map of Wisconsin counties, colored by region">${groups}<path class="mesh" d="${map.mesh}"></path><g class="pins" id="pins"></g></svg>`;
+  mapEl.innerHTML = `<svg viewBox="${map.viewBox.join(' ')}" role="group" aria-label="Map of Wisconsin counties, colored by region">${groups}<path class="mesh" d="${map.mesh}"></path><path class="county-outline" id="county-outline" d=""></path><g class="pins" id="pins"></g></svg>`;
+  svg = mapEl.querySelector('svg');
+  const [x, y, w, h] = map.viewBox;
+  base = { x, y, w, h };
+  view = { ...base };
+  applyView();
 }
 
+// Marker shapes are drawn around 0,0 and offset from each other so programs at one venue do not hide each other.
 const PIN = {
-  fll: (x, y) => `<circle class="pin pin-fll" cx="${x - 4}" cy="${y}" r="4"></circle>`,
-  ftc: (x, y) => `<path class="pin pin-ftc" d="M${x + 4},${y - 5}l5,5 -5,5 -5,-5z"></path>`,
-  frc: (x, y) => `<path class="pin pin-frc" d="M${x},${y - 11}l5,9 -10,0z"></path>`,
-  other: (x, y) => `<circle class="pin pin-other" cx="${x}" cy="${y + 6}" r="3.5"></circle>`,
+  fll: '<circle class="pin pin-fll" cx="-4" cy="0" r="4"></circle>',
+  ftc: '<path class="pin pin-ftc" d="M4,-5l5,5 -5,5 -5,-5z"></path>',
+  frc: '<path class="pin pin-frc" d="M0,-11l5,9 -10,0z"></path>',
+  other: '<circle class="pin pin-other" cx="0" cy="6" r="3.5"></circle>',
 };
 function drawPins() {
   const seen = new Set();
   const out = [];
+  const s = zoomLevel() ** -0.6; // markers grow a little when zoomed in, not in step with the map
+  const cell = 5 * s;
   if (state.pins) {
     for (const e of upcoming()) {
       if (e.x == null || !shows(e)) continue;
-      const key = `${e.program}:${Math.round(e.x / 5)}:${Math.round(e.y / 5)}`;
+      const key = `${e.program}:${Math.round(e.x / cell)}:${Math.round(e.y / cell)}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push((PIN[e.program] ?? PIN.other)(e.x, e.y));
+      out.push(`<g transform="translate(${e.x},${e.y}) scale(${s.toFixed(3)})">${PIN[e.program] ?? PIN.other}</g>`);
     }
   }
   document.getElementById('pins').innerHTML = out.join('');
-  for (const g of mapEl.querySelectorAll('.region')) g.classList.toggle('dim', Boolean(state.region) && g.dataset.region !== state.region);
+}
+
+function drawSelection() {
+  for (const g of mapEl.querySelectorAll('.region')) {
+    g.classList.toggle('dim', Boolean(state.region) && g.dataset.region !== state.region);
+    g.classList.toggle('active', g.dataset.region === state.region);
+  }
+  document.getElementById('county-outline').setAttribute('d', state.county ? map.counties[state.county].d : '');
+  const sel = state.county ?? state.region ?? '';
+  if (sel === lastSelection) return;
+  lastSelection = sel;
+  if (state.county) fitBox(mapEl.querySelector(`[data-county="${CSS.escape(state.county)}"]`).getBBox(), 2.6);
+  else if (state.region) fitBox(mapEl.querySelector(`[data-region="${CSS.escape(state.region)}"]`).getBBox(), 1.15);
+  else flyTo(base);
+}
+
+// ---- Zoom and pan (the SVG viewBox is the camera) ----------------------------------
+const MAX_ZOOM = 8;
+let svg;
+let base;
+let view;
+let lastSelection = '';
+let flight = 0;
+let suppressClickUntil = 0;
+const zoomLevel = () => (base ? base.w / view.w : 1);
+
+function applyView() {
+  view.w = Math.min(base.w, Math.max(base.w / MAX_ZOOM, view.w));
+  view.h = (view.w * base.h) / base.w;
+  view.x = Math.min(base.x + base.w - view.w, Math.max(base.x, view.x));
+  view.y = Math.min(base.y + base.h - view.h, Math.max(base.y, view.y));
+  const k = zoomLevel();
+  svg.setAttribute('viewBox', [view.x, view.y, view.w, view.h].map((n) => n.toFixed(2)).join(' '));
+  svg.style.setProperty('--inv', (1 / k).toFixed(4)); // keeps line widths steady on screen
+  svg.style.setProperty('--lab', (k ** -0.6).toFixed(4)); // labels grow, but slower than the map
+  svg.classList.toggle('zoomed', k > 1.01);
+  const far = k >= 1.8;
+  if (far !== svg.classList.contains('zoomed-far')) {
+    svg.classList.toggle('zoomed-far', far);
+    for (const t of svg.querySelectorAll('.county-label')) t.textContent = far ? t.dataset.full : t.dataset.short; // room for full names when zoomed in
+  }
+  document.getElementById('zoom-in').disabled = k >= MAX_ZOOM - 0.01;
+  document.getElementById('zoom-out').disabled = k <= 1.01;
+  document.getElementById('zoom-reset').disabled = k <= 1.01;
+  drawPins();
+}
+function flyTo(target) {
+  cancelAnimationFrame(flight);
+  const from = { ...view };
+  const to = { x: target.x, y: target.y, w: target.w };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    Object.assign(view, to);
+    return applyView();
+  }
+  const t0 = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / 350);
+    const e = 1 - (1 - t) ** 3;
+    view.w = from.w + (to.w - from.w) * e;
+    view.x = from.x + (to.x - from.x) * e;
+    view.y = from.y + (to.y - from.y) * e;
+    applyView();
+    if (t < 1) flight = requestAnimationFrame(step);
+  };
+  flight = requestAnimationFrame(step);
+}
+function fitBox(b, pad) {
+  const w = Math.min(base.w, Math.max(b.width * pad, (b.height * pad * base.w) / base.h, base.w / MAX_ZOOM));
+  const h = (w * base.h) / base.w;
+  flyTo({ x: b.x + b.width / 2 - w / 2, y: b.y + b.height / 2 - h / 2, w });
+}
+// Zoom by a factor while the map point (cx, cy) stays where it is on screen.
+function zoomAt(factor, cx = view.x + view.w / 2, cy = view.y + view.h / 2, animate = true) {
+  const w = Math.min(base.w, Math.max(base.w / MAX_ZOOM, view.w / factor));
+  const r = w / view.w;
+  const target = { x: cx - (cx - view.x) * r, y: cy - (cy - view.y) * r, w };
+  if (animate) return flyTo(target);
+  cancelAnimationFrame(flight);
+  Object.assign(view, target);
+  applyView();
+}
+function toMap(clientX, clientY) {
+  const m = svg.getScreenCTM();
+  return { x: (clientX - m.e) / m.a, y: (clientY - m.f) / m.d, scale: m.a };
 }
 
 // ---- Panel pieces --------------------------------------------------------------
@@ -93,6 +184,26 @@ function tiles(scope) {
   }).join('')}</div>`;
 }
 const tableHead = (first) => `<div class="row row-head${first === 'Area' ? ' no-arrow' : ''}"><span>${first}</span>${PROGRAMS.map((p) => `<span class="num ${p.id}">${p.label}</span>`).join('')}${first === 'Area' ? '' : '<span></span>'}</div>`;
+
+function championCard(r) {
+  const champion = data.champions[r.id]?.name;
+  return `<div class="card">
+      <div class="kicker">Region champion</div>
+      <div class="card-name">${champion ? esc(champion) : 'To be announced'}</div>
+      <p>Ask about starting a team, volunteering or sponsoring. Your message is forwarded by email, and the champion's address stays private.</p>
+      <button type="button" class="btn link" data-action="view" data-view="contact">${champion ? 'Contact the champion' : 'Contact FIRST Wisconsin'}</button>
+    </div>`;
+}
+function eventGroups(list) {
+  return [...PROGRAMS.map((p) => ({ id: p.id, title: `${p.label} events` })), { id: 'other', title: 'Other events' }]
+    .filter((g) => state.prog === 'all' || state.prog === g.id)
+    .map((g) => ({ ...g, items: list.filter((e) => e.program === g.id) }))
+    .filter((g) => g.items.length)
+    .map((g) => `<div class="group-head ${g.id}">${g.title}</div>${g.items.map((e) => {
+      const name = e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.name)}</a>` : esc(e.name);
+      return `<div class="event"><div class="event-date">${esc(dateRange(e))}</div><div><div>${name}</div><div class="event-where">${esc([e.city, e.type].filter(Boolean).join(' · '))}</div></div></div>`;
+    }).join('')}`).join('');
+}
 
 function overview() {
   const rows = map.regions.map((r) => `<button type="button" class="row row-item" data-action="open" data-region="${esc(r.id)}">
@@ -118,33 +229,39 @@ function regionHead(r) {
 }
 
 function teams(r) {
-  const champion = data.champions[r.id]?.name;
-  const areaTable = r.areas.length > 1
+  const split = r.areas.length > 1;
+  const areaTable = split
     ? `<div class="table">${tableHead('Area')}${r.areas.map((a) => `<div class="row row-item no-arrow"><span class="row-name"><span class="swatch" style="background:${esc(a.color)}"></span><span>${esc(a.name)}</span></span>${PROGRAMS.map((p) => `<span class="num">${areaCount(a, p.id)}</span>`).join('')}</div>`).join('')}</div>`
     : '';
+  const countyRows = r.areas.flatMap((a) => a.counties.map((c) => `<button type="button" class="row row-item" data-action="county" data-county="${esc(c)}">
+    <span class="row-name"><span class="swatch" style="background:${esc(a.color)}"></span><span>${esc(c)}</span></span>
+    ${PROGRAMS.map((p) => `<span class="num">${data.counties[c]?.[p.id] ?? 0}</span>`).join('')}${FORWARD}</button>`)).join('');
   return `${regionHead(r)}${tiles(r)}${areaTable}
-    <div class="card">
-      <div class="kicker">Region champion</div>
-      <div class="card-name">${champion ? esc(champion) : 'To be announced'}</div>
-      <p>Ask about starting a team, volunteering or sponsoring. Your message is forwarded by email, and the champion's address stays private.</p>
-      <button type="button" class="btn link" data-action="view" data-view="contact">${champion ? 'Contact the champion' : 'Contact FIRST Wisconsin'}</button>
-    </div>`;
+    <div class="table">${tableHead('County')}${countyRows}</div>
+    ${championCard(r)}`;
 }
 
 function events(r) {
-  const list = upcoming().filter((e) => e.region === r.id);
   const chips = [{ id: 'all', label: 'All' }, ...PROGRAMS, { id: 'other', label: 'Other' }]
     .map((c) => `<button type="button" class="chip" aria-pressed="${state.prog === c.id}" data-action="prog" data-prog="${c.id}">${c.label}</button>`).join('');
-  const groups = [...PROGRAMS.map((p) => ({ id: p.id, title: `${p.label} events` })), { id: 'other', title: 'Other events' }]
-    .filter((g) => state.prog === 'all' || state.prog === g.id)
-    .map((g) => ({ ...g, items: list.filter((e) => e.program === g.id) }))
-    .filter((g) => g.items.length)
-    .map((g) => `<div class="group-head ${g.id}">${g.title}</div>${g.items.map((e) => {
-      const name = e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.name)}</a>` : esc(e.name);
-      return `<div class="event"><div class="event-date">${esc(dateRange(e))}</div><div><div>${name}</div><div class="event-where">${esc([e.city, e.type].filter(Boolean).join(' · '))}</div></div></div>`;
-    }).join('')}`).join('');
   return `${regionHead(r)}<div class="chips">${chips}</div>
-    <div class="events">${groups || '<p class="empty">No upcoming events are listed here for this region yet.</p>'}</div>`;
+    <div class="events">${eventGroups(upcoming().filter((e) => e.region === r.id)) || '<p class="empty">No upcoming events are listed here for this region yet.</p>'}</div>`;
+}
+
+function county(r) {
+  const c = state.county;
+  const n = data.counties[c] ?? {};
+  const area = r.areas.find((a) => a.counties.includes(c));
+  const where = r.areas.length > 1 ? `${esc(area.name)}, ${esc(r.name)}` : esc(r.name);
+  return `<div class="head">
+      <button type="button" class="link-btn" data-action="view" data-view="teams">${BACK}Back to ${esc(r.name)}</button>
+      <div class="head-title"><span class="swatch lg" style="background:${esc(area.color)}"></span><h2 tabindex="-1">${esc(c)} County</h2></div>
+      <div class="area-line">${where}</div>
+    </div>
+    <div class="tiles">${PROGRAMS.map((p) => `<div class="tile ${p.id}"><div class="tile-figure">${n[p.id] ?? 0}</div><div class="tile-caption">${p.label} teams</div></div>`).join('')}</div>
+    <p class="note">Goals are set for the whole region, not for single counties.</p>
+    <div class="events"><div class="kicker">Upcoming events in ${esc(c)} County</div>${eventGroups(upcoming().filter((e) => e.county === c)) || '<p class="empty">No upcoming events are listed in this county yet.</p>'}</div>
+    ${championCard(r)}`;
 }
 
 function contact(r) {
@@ -177,7 +294,9 @@ function sent(r) {
 function render(focus = false) {
   const r = region();
   if (!r) state.view = 'overview';
-  panel.innerHTML = { overview: () => overview(), teams: () => teams(r), events: () => events(r), contact: () => contact(r), sent: () => sent(r) }[state.view]();
+  if (state.view !== 'county') state.county = null;
+  panel.innerHTML = { overview: () => overview(), teams: () => teams(r), county: () => county(r), events: () => events(r), contact: () => contact(r), sent: () => sent(r) }[state.view]();
+  drawSelection();
   drawPins();
   if (state.view === 'contact') mountTurnstile();
   if (focus) {
@@ -268,9 +387,11 @@ async function submit(form) {
 
 // ---- Events ------------------------------------------------------------------------
 function openRegion(id) {
-  state.region = id;
-  state.view = 'teams';
-  state.prog = 'all';
+  Object.assign(state, { region: id, county: null, view: 'teams', prog: 'all' });
+  render(true);
+}
+function openCounty(name) {
+  Object.assign(state, { region: map.counties[name].region, county: name, view: 'county', prog: 'all' });
   render(true);
 }
 panel.addEventListener('click', (ev) => {
@@ -278,6 +399,7 @@ panel.addEventListener('click', (ev) => {
   if (!el) return;
   const a = el.dataset.action;
   if (a === 'open') return openRegion(el.dataset.region);
+  if (a === 'county') return openCounty(el.dataset.county);
   if (a === 'home') Object.assign(state, { region: null, view: 'overview', prog: 'all' });
   if (a === 'view') {
     state.view = el.dataset.view;
@@ -291,10 +413,88 @@ panel.addEventListener('submit', (ev) => {
   ev.preventDefault();
   submit(ev.target);
 });
+// First click opens the region; a click on a county inside the open region opens that county.
 mapEl.addEventListener('click', (ev) => {
+  if (performance.now() < suppressClickUntil) return;
   const g = ev.target.closest('.region');
-  if (g) openRegion(g.dataset.region);
+  if (!g) return;
+  const c = ev.target.closest('.county');
+  if (c && g.dataset.region === state.region) openCounty(c.dataset.county);
+  else openRegion(g.dataset.region);
 });
+
+// Mouse: drag to move when zoomed in. Ctrl + wheel (or a trackpad pinch) zooms; a plain wheel still scrolls the page.
+let drag = null;
+mapEl.addEventListener('pointerdown', (ev) => {
+  if (ev.pointerType !== 'mouse' || ev.button !== 0 || zoomLevel() <= 1.01) return;
+  drag = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, vx: view.x, vy: view.y, scale: svg.getScreenCTM().a, moved: false };
+});
+mapEl.addEventListener('pointermove', (ev) => {
+  if (!drag || ev.pointerId !== drag.id) return;
+  const dx = ev.clientX - drag.x;
+  const dy = ev.clientY - drag.y;
+  if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+  if (!drag.moved) {
+    drag.moved = true;
+    cancelAnimationFrame(flight);
+    svg.setPointerCapture(ev.pointerId);
+    svg.classList.add('dragging');
+  }
+  view.x = drag.vx - dx / drag.scale;
+  view.y = drag.vy - dy / drag.scale;
+  applyView();
+});
+const endDrag = (ev) => {
+  if (!drag || ev.pointerId !== drag.id) return;
+  if (drag.moved) {
+    suppressClickUntil = performance.now() + 250;
+    svg.classList.remove('dragging');
+  }
+  drag = null;
+};
+mapEl.addEventListener('pointerup', endDrag);
+mapEl.addEventListener('pointercancel', endDrag);
+mapEl.addEventListener('wheel', (ev) => {
+  if (!ev.ctrlKey && !ev.metaKey) return;
+  ev.preventDefault();
+  const p = toMap(ev.clientX, ev.clientY);
+  zoomAt(Math.exp(-ev.deltaY * 0.01), p.x, p.y, false);
+}, { passive: false });
+
+// Touch: one finger scrolls the page as usual, two fingers move and zoom the map.
+let pinch = null;
+const touchInfo = (ts) => ({ x: (ts[0].clientX + ts[1].clientX) / 2, y: (ts[0].clientY + ts[1].clientY) / 2, dist: Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY) });
+mapEl.addEventListener('touchstart', (ev) => {
+  if (ev.touches.length !== 2) return;
+  ev.preventDefault();
+  cancelAnimationFrame(flight);
+  const t = touchInfo(ev.touches);
+  const p = toMap(t.x, t.y);
+  // ox, oy: where map point 0,0 sits on screen at zoom 1 spacing; it does not move while the view changes.
+  pinch = { dist: t.dist, w: view.w, scale: p.scale, px: p.x, py: p.y, ox: t.x - (p.x - view.x) * p.scale, oy: t.y - (p.y - view.y) * p.scale };
+}, { passive: false });
+mapEl.addEventListener('touchmove', (ev) => {
+  if (!pinch || ev.touches.length !== 2) return;
+  ev.preventDefault();
+  const t = touchInfo(ev.touches);
+  const w = Math.min(base.w, Math.max(base.w / MAX_ZOOM, (pinch.w * pinch.dist) / Math.max(t.dist, 1)));
+  const scale = (pinch.scale * pinch.w) / w;
+  view.w = w;
+  view.x = pinch.px - (t.x - pinch.ox) / scale;
+  view.y = pinch.py - (t.y - pinch.oy) / scale;
+  applyView();
+}, { passive: false });
+const endPinch = () => {
+  if (!pinch) return;
+  pinch = null;
+  suppressClickUntil = performance.now() + 400;
+};
+mapEl.addEventListener('touchend', endPinch);
+mapEl.addEventListener('touchcancel', endPinch);
+
+document.getElementById('zoom-in').addEventListener('click', () => zoomAt(1.6));
+document.getElementById('zoom-out').addEventListener('click', () => zoomAt(1 / 1.6));
+document.getElementById('zoom-reset').addEventListener('click', () => flyTo(base));
 mapEl.addEventListener('keydown', (ev) => {
   const g = ev.target.closest('.region');
   if (g && (ev.key === 'Enter' || ev.key === ' ')) {

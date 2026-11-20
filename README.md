@@ -53,6 +53,8 @@ Other commands: `node scripts/build-data.mjs` refreshes the data now, `node scri
 3. **Wix, desktop.** In the editor choose Add Elements → Embed Code → Embed a Site, paste the GitHub Pages address, and size the frame to about 1280 × 920. On wide frames the page fills whatever height you give it and the side panel scrolls inside.
 4. **Wix, mobile.** In the mobile editor hide the desktop embed and add a second one about 390 wide and 1700 tall.
 
+Using the map: the first click opens a region and zooms to it; a click on a county inside the open region opens that county (its team counts and events). The buttons at the top right of the map zoom in, zoom out and show the whole state. With a mouse, drag to move the map when zoomed in, and hold Ctrl while scrolling to zoom. On a touch screen one finger scrolls the page and two fingers move and zoom the map.
+
 Address options: add `?region=nel` to open on a region, and `?header=0` to hide the title when the Wix page already has one.
 
 GitHub pauses scheduled jobs in repositories with no activity for 60 days; if the nightly refresh stops, re-enable it under the Actions tab.
