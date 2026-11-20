@@ -1,0 +1,42 @@
+# Team counts by county, made by scripts/import-team-report.mjs from the FIRST Team Status Report.
+# Counts only. Never commit the report itself: it holds personal data and this repository is public.
+# season: 2026-27
+# report date: 2026-11-19
+# counted: teams whose Secured Status is "Secured" for the season. FLL is Challenge, Explore and Future Edition together.
+# The "(unplaced)" row is teams with no usable county; they count toward the state total only.
+county,fll,ftc,frc
+Brown,20,5,2
+Calumet,0,1,0
+Chippewa,0,2,3
+Columbia,0,1,0
+Crawford,0,2,0
+Dane,23,9,5
+Dodge,4,1,0
+Door,0,1,0
+Douglas,0,0,1
+Dunn,0,0,1
+Eau Claire,2,0,2
+Fond du Lac,2,1,2
+Grant,3,2,1
+Green,3,0,0
+Iowa,0,1,0
+La Crosse,12,19,4
+Manitowoc,26,10,5
+Marinette,0,0,1
+Milwaukee,47,29,16
+Monroe,0,2,1
+Oneida,3,0,0
+Outagamie,13,0,2
+Ozaukee,32,8,1
+Pierce,1,0,1
+Polk,1,0,0
+Racine,7,0,2
+Rock,16,2,1
+Sheboygan,9,6,2
+Trempealeau,0,3,0
+Vernon,0,1,1
+Walworth,6,1,1
+Washington,12,0,2
+Waukesha,72,15,9
+Waupaca,0,0,1
+Winnebago,11,0,1

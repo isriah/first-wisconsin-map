@@ -1,6 +1,6 @@
-// Minimal CSV reader: quoted fields, doubled quotes, commas and newlines inside quotes.
+// Minimal CSV reader (pass '	' as the delimiter for tab-separated files): quoted fields, doubled quotes, commas and newlines inside quotes.
 // Returns an array of objects keyed by the header row. Blank lines and lines starting with # are skipped.
-export function parseCsv(text) {
+export function parseCsv(text, delimiter = ',') {
   const rows = [];
   let row = [];
   let field = '';
@@ -15,7 +15,7 @@ export function parseCsv(text) {
       } else if (ch === '"') quoted = false;
       else field += ch;
     } else if (ch === '"') quoted = true;
-    else if (ch === ',') {
+    else if (ch === delimiter) {
       row.push(field);
       field = '';
     } else if (ch === '\n' || ch === '\r') {

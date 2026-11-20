@@ -231,7 +231,9 @@ function overview() {
   return `<div><div class="kicker">${esc(data.season.label)} season</div><h2 tabindex="-1">Statewide</h2></div>
     ${tiles('state')}
     <div class="table">${tableHead('Region')}${rows}</div>
-    <p class="note">Team counts come from the <i>FIRST</i> team search for the ${esc(data.season.label)} season. FLL counts Challenge and Explore teams together.</p>`;
+    <p class="note">${data.teams?.source === 'report'
+      ? `Team counts are teams registered for the ${esc(data.season.label)} season${data.teams.asOf ? `, as of ${fmt(data.teams.asOf, { month: 'short', day: 'numeric', year: 'numeric' })}` : ''}.`
+      : `Team counts come from the <i>FIRST</i> team search for the ${esc(data.season.label)} season.`} FLL counts all <i>FIRST</i> LEGO League divisions together.</p>`;
 }
 
 function regionHead(r) {

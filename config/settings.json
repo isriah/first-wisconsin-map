@@ -1,5 +1,5 @@
 {
-  "season": { "label": "2025-26", "fllFtcYear": 2025, "frcYear": 2026 },
+  "season": { "label": "2026-27", "fllFtcYear": 2026, "frcYear": 2027 },
   "teamPrograms": { "fll": ["FLL", "JFLL", "FLL2"], "ftc": ["FTC"], "frc": ["FRC"] },
   "eventPrograms": { "fll": ["FLL", "JFLL", "FLL2"], "ftc": ["FTC"], "frc": ["FRC"] },
   "source": {

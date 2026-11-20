@@ -42,15 +42,51 @@ for (const row of await readCsv('data/team-overrides.csv')) {
   if (!county) throw new Error(`data/team-overrides.csv: unknown county "${row.county}"`);
   overrides.set(`${row.program.toLowerCase()}:${row.team_number}`, county);
 }
+// Fallback by city when a team's ZIP code cannot be placed (for example a typo that points out of state).
+// Keyed by city, not by team, so no team is identified in this public repository.
+const cityCounties = new Map();
+for (const row of await readCsv('data/city-counties.csv')) {
+  const county = findCounty(row.county);
+  if (!county) throw new Error(`data/city-counties.csv: unknown county "${row.county}"`);
+  cityCounties.set(row.city.trim().toLowerCase(), county);
+}
+
+// When data/team-counts.csv exists (made by scripts/import-team-report.mjs) it is the source of the team
+// counts, and the public team search is not used.
+let reportText = '';
+try {
+  reportText = await readFile(new URL('data/team-counts.csv', root), 'utf8');
+} catch {}
+const reportRows = parseCsv(reportText);
+const fromReport = reportRows.length > 0;
+if (fromReport) {
+  const season = /^#\s*season:\s*(\S+)/m.exec(reportText)?.[1];
+  if (season !== settings.season.label) throw new Error(`data/team-counts.csv is for season ${season}, but config/settings.json says ${settings.season.label}.`);
+}
+const teams = fromReport
+  ? { source: 'report', asOf: /^#\s*report date:\s*(\d{4}-\d{2}-\d{2})/m.exec(reportText)?.[1] ?? null }
+  : { source: 'search', asOf: null };
 
 const { fllFtcYear, frcYear } = settings.season;
 const years = [...new Set([fllFtcYear, frcYear])];
-const teamHits = (await Promise.all(years.map((y) => search(settings.source.teams, `team_stateprov:${state} AND profile_year:${y} AND countryCode:US`)))).flat();
+const teamHits = fromReport ? [] : (await Promise.all(years.map((y) => search(settings.source.teams, `team_stateprov:${state} AND profile_year:${y} AND countryCode:US`)))).flat();
 
 const counties = Object.fromEntries(Object.keys(map.counties).map((c) => [c, { fll: 0, ftc: 0, frc: 0 }]));
 const totals = { fll: 0, ftc: 0, frc: 0 };
 const unplaced = [];
 const skippedTypes = {};
+let unplacedCount = 0;
+for (const row of reportRows) {
+  const county = findCounty(row.county);
+  if (!county && row.county !== '(unplaced)') throw new Error(`data/team-counts.csv: unknown county "${row.county}"`);
+  for (const p of PROGRAMS) {
+    const n = Number(row[p] || 0);
+    if (!Number.isInteger(n) || n < 0) throw new Error(`data/team-counts.csv: ${row.county} ${p} must be a whole number`);
+    totals[p] += n;
+    if (county) counties[county][p] += n;
+    else unplacedCount += n;
+  }
+}
 for (const t of teamHits) {
   const program = programOf(settings.teamPrograms, t.team_type);
   if (!program) {
@@ -60,7 +96,7 @@ for (const t of teamHits) {
   if (t.profile_year !== (program === 'frc' ? frcYear : fllFtcYear)) continue;
   totals[program]++;
   const loc = t.location?.[0];
-  const county = overrides.get(`${program}:${t.team_number_yearly}`) ?? (loc ? locateCounty(outlines, loc.lon, loc.lat) : null);
+  const county = overrides.get(`${program}:${t.team_number_yearly}`) ?? (loc ? locateCounty(outlines, loc.lon, loc.lat) : null) ?? cityCounties.get((t.team_city ?? '').trim().toLowerCase()) ?? null;
   if (county) counties[county][program]++;
   else unplaced.push(`${program.toUpperCase()} ${t.team_number_yearly} (${t.team_city ?? '?'}, ${t.team_postalcode ?? '?'})`);
 }
@@ -144,11 +180,14 @@ if (!force) {
   }
 }
 
-const data = { season: settings.season, totals, counties, events, goals, champions };
+const data = { season: settings.season, teams, totals, counties, events, goals, champions };
 const same = previous && JSON.stringify({ ...previous, generated: undefined }) === JSON.stringify({ ...data, generated: undefined });
 if (!same) await writeFile(new URL('site/data/data.json', root), JSON.stringify({ generated: new Date().toISOString(), ...data }));
 
+console.log(`Team counts from ${fromReport ? 'data/team-counts.csv' : 'the FIRST team search'}.`);
 console.log(`Teams ${settings.season.label}: FLL ${totals.fll}, FTC ${totals.ftc}, FRC ${totals.frc}. Upcoming events: ${events.length}.`);
 if (Object.keys(skippedTypes).length) console.log('Team types not counted:', JSON.stringify(skippedTypes));
-if (unplaced.length) console.log(`Not placed in a county (add to data/team-overrides.csv):\n  ${unplaced.join('\n  ')}`);
+// The nightly job's log is public, so team details are only printed on your own computer.
+if (unplacedCount) console.log(`${unplacedCount} team(s) in the report have no county; they count toward the state total only.`);
+if (unplaced.length) console.log(process.env.CI ? `${unplaced.length} team(s) not placed in a county. Run this script on your own computer to see which.` : `Not placed in a county (add the city to data/city-counties.csv):\n  ${unplaced.join('\n  ')}`);
 console.log(same ? 'No changes.' : 'Wrote site/data/data.json.');

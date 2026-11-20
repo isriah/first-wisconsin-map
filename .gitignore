@@ -2,3 +2,7 @@ node_modules/
 .wrangler/
 .dev.vars
 .claude/
+# FIRST reports hold personal data and must never be committed. Only data/team-counts.csv (counts) belongs here.
+*Team Status Report*
+*PII*
+reports/

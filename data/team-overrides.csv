@@ -1,2 +1,3 @@
 # Fixes for teams the ZIP code lookup puts in the wrong county, or cannot place.
+# This repository is public: do not commit team numbers here unless FIRST Wisconsin is happy for them to be public.
 program,team_number,county

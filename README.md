@@ -22,19 +22,34 @@ All four files are plain CSV. Edit them on github.com or in a spreadsheet, save,
 - **`data/goals.csv`**: one row per region with the FLL, FTC and FRC goals. Leave a cell empty for "Goal not set". Progress is teams divided by goal. The statewide goal is the sum of the regions unless you fill in the `state` row.
 - **`data/champions.csv`**: the champion's name for each region. Names only. Email addresses go in the Worker secret (see `worker/README.md`) so they are never public.
 - **`data/other-events.csv`**: events you add yourself. Dates are `YYYY-MM-DD`; `county` decides which region the event belongs to and where its marker goes.
-- **`data/team-overrides.csv`**: moves a team to the right county when the ZIP code lookup gets it wrong. The refresh prints any team it could not place.
+- **`data/team-counts.csv`**: team counts per county. Do not edit by hand; it is made from the FIRST Team Status Report (see "Updating team counts" below).
 
 Region ids for the `scope` column: `milwaukee`, `woww`, `southshore`, `nel`, `foxvalley`, `cnw`, `north`, `sevenrivers`, `capital`, `driftless`.
 
 ## Where the numbers come from
 
-`scripts/build-data.mjs` reads the public FIRST team and event search (the one behind the team and event finder on firstinspires.org) and writes `site/data/data.json`.
+`scripts/build-data.mjs` writes `site/data/data.json` from `data/team-counts.csv` (teams) and the public FIRST event search (events).
 
-- Teams are placed in a county by the location of their ZIP code, because FIRST does not publish a county. A few teams near county lines land next door; fix them in `data/team-overrides.csv`.
-- The season is set in `config/settings.json`. FIRST labels seasons differently by program: the 2025-26 school year is `2025` for FLL and FTC and `2026` for FRC.
-- FLL counts Challenge and Explore together. Change `teamPrograms` in `config/settings.json` to count them differently.
+- A team counts when the report shows it as Secured (registered and paid) for the season. The county is the one in the report.
+- If `data/team-counts.csv` is deleted, the counts fall back to the public FIRST team search, which places teams by ZIP code.
+- The season is set in `config/settings.json`. FIRST labels seasons differently by program: the 2026-27 school year is `2026` for FLL and FTC and `2027` for FRC.
+- FLL counts Challenge, Explore and Future Edition together.
 - Only events that have not ended are kept. Remote events with no location are not shown.
 - If the search fails or a program's count drops by more than half, the refresh stops and the site keeps its previous data.
+
+## Updating team counts
+
+1. Download the Team Status Report from Tableau as a CSV. Save it outside this folder (for example in Downloads).
+2. Run `node scripts/import-team-report.mjs "C:path	oeport.csv"`, then `node scripts/build-data.mjs`.
+3. Commit `data/team-counts.csv` and `site/data/data.json`.
+
+## Team privacy
+
+The report holds personal data: coach names, emails, phone numbers and addresses. This repository and its job logs are public, so:
+
+- Never commit the report. The import script reads it where it is and writes only counts per county.
+- The page shows numbers of teams per county and nothing else about a team: no team numbers, names, schools or addresses, and no team markers on the map.
+- Do not add team numbers or names to any file here.
 
 ## Preview on your computer
 
