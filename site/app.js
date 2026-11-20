@@ -8,6 +8,7 @@ const PROGRAMS = [
 ];
 const ROLES = ['Parent or guardian', 'Educator', 'Mentor or volunteer', 'Sponsor or community partner', 'Student'];
 const mapEl = document.getElementById('map');
+const crumbs = document.getElementById('crumbs');
 const panel = document.getElementById('panel');
 const params = new URLSearchParams(location.search);
 const state = { region: null, county: null, view: 'overview', prog: 'all', pins: true, sending: false };
@@ -91,12 +92,30 @@ function drawSelection() {
     g.classList.toggle('active', g.dataset.region === state.region);
   }
   document.getElementById('county-outline').setAttribute('d', state.county ? map.counties[state.county].d : '');
+  drawCrumbs();
   const sel = state.county ?? state.region ?? '';
   if (sel === lastSelection) return;
   lastSelection = sel;
   if (state.county) fitBox(mapEl.querySelector(`[data-county="${CSS.escape(state.county)}"]`).getBBox(), 2.6);
   else if (state.region) fitBox(mapEl.querySelector(`[data-region="${CSS.escape(state.region)}"]`).getBBox(), 1.15);
   else flyTo(base);
+}
+
+// The trail on the map itself, so there is always a way back next to where you clicked.
+function drawCrumbs() {
+  const r = region();
+  const sep = '<span aria-hidden="true">›</span>';
+  crumbs.hidden = !r;
+  crumbs.innerHTML = !r ? '' : `<button type="button" data-up="home">Wisconsin</button>${sep}${state.county
+    ? `<button type="button" data-up="region">${esc(r.name)}</button>${sep}<span aria-current="location">${esc(state.county)} County</span>`
+    : `<span aria-current="location">${esc(r.name)}</span>`}`;
+}
+// One level up: county to region, region to the whole state.
+function goUp(to = state.county ? 'region' : 'home') {
+  if (!state.region) return;
+  if (to === 'region') Object.assign(state, { county: null, view: 'teams', prog: 'all' });
+  else Object.assign(state, { region: null, county: null, view: 'overview', prog: 'all' });
+  render(true);
 }
 
 // ---- Zoom and pan (the SVG viewBox is the camera) ----------------------------------
@@ -417,7 +436,7 @@ panel.addEventListener('submit', (ev) => {
 mapEl.addEventListener('click', (ev) => {
   if (performance.now() < suppressClickUntil) return;
   const g = ev.target.closest('.region');
-  if (!g) return;
+  if (!g) return goUp(); // empty space around the state
   const c = ev.target.closest('.county');
   if (c && g.dataset.region === state.region) openCounty(c.dataset.county);
   else openRegion(g.dataset.region);
@@ -492,6 +511,14 @@ const endPinch = () => {
 mapEl.addEventListener('touchend', endPinch);
 mapEl.addEventListener('touchcancel', endPinch);
 
+crumbs.addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-up]');
+  if (b) goUp(b.dataset.up);
+});
+document.addEventListener('keydown', (ev) => {
+  if (ev.key !== 'Escape' || !state.region || ev.target.closest?.('input, textarea, select')) return;
+  goUp();
+});
 document.getElementById('zoom-in').addEventListener('click', () => zoomAt(1.6));
 document.getElementById('zoom-out').addEventListener('click', () => zoomAt(1 / 1.6));
 document.getElementById('zoom-reset').addEventListener('click', () => flyTo(base));

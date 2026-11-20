@@ -19,6 +19,7 @@
 <section class="map-col" aria-label="Map">
 <div class="map-wrap">
 <div class="map" id="map"></div>
+<nav class="crumbs" id="crumbs" aria-label="Where you are on the map" hidden></nav>
 <div class="zoom" role="group" aria-label="Map zoom">
 <button type="button" id="zoom-in" aria-label="Zoom in" title="Zoom in"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8,2v12M2,8h12"></path></svg></button>
 <button type="button" id="zoom-out" aria-label="Zoom out" title="Zoom out" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2,8h12"></path></svg></button>
@@ -32,7 +33,7 @@
 <span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,1l5,10 -10,0z" class="pin pin-frc"></path></svg>FRC</span>
 <span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" class="pin pin-other"></circle></svg>Other</span>
 </div>
-<p class="note">Thick black lines separate regions. Two shades of one color are two areas of the same region. Zoom with the buttons or by pinching with two fingers; drag to move the map when zoomed in.</p>
+<p class="note">Thick black lines separate regions. Two shades of one color are two areas of the same region. Zoom with the buttons or by pinching with two fingers; drag to move the map when zoomed in. To go back, use the trail at the top left of the map, press Esc, or click outside the state.</p>
 </section>
 <section class="panel" id="panel" aria-live="polite"><p class="note">Loading map data.</p></section>
 </main>

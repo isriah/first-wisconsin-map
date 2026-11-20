@@ -49,6 +49,12 @@ a:hover { color: var(--blue-dark); }
 .map svg { display: block; width: 100%; height: auto; max-width: 620px; margin: 0 auto; font: 9px var(--sans); --inv: 1; --lab: 1; }
 .map svg.zoomed { cursor: grab; }
 .map svg.dragging { cursor: grabbing; }
+.crumbs { position: absolute; top: 0; left: 0; max-width: calc(100% - 52px); display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; padding: 0 12px; border: 1px solid var(--border); background: var(--paper); font-size: 14px; }
+.crumbs[hidden] { display: none; }
+.crumbs button { min-height: 40px; padding: 0; border: 0; background: none; color: var(--blue); text-decoration: underline; cursor: pointer; }
+.crumbs button:hover { color: var(--blue-dark); }
+.crumbs span[aria-current] { font-weight: 700; }
+.crumbs span[aria-hidden] { color: var(--muted); }
 .zoom { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--paper); }
 .zoom button { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; background: var(--paper); cursor: pointer; }
 .zoom button + button { border-top: 1px solid var(--line); }
