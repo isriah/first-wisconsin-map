@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&amp;family=Roboto+Condensed:wght@700&amp;display=swap">
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 <div class="strip" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -26,18 +26,26 @@
 <button type="button" id="zoom-reset" aria-label="Show the whole state" title="Show the whole state" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2,6V2h4M10,2h4v4M14,10v4h-4M6,14H2v-4"></path></svg></button>
 </div>
 </div>
-<div class="legend">
-<label class="check"><input type="checkbox" id="pins-toggle" checked>Show upcoming events</label>
-<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="pin pin-fll"></circle></svg>FLL</span>
-<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,0.5l5.5,5.5 -5.5,5.5 -5.5,-5.5z" class="pin pin-ftc"></path></svg>FTC</span>
-<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,1l5,10 -10,0z" class="pin pin-frc"></path></svg>FRC</span>
-<span class="key"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" class="pin pin-other"></circle></svg>Other</span>
+<div class="legend" id="legend">
+<div class="legend-row" role="group" aria-label="Teams shown on the map">
+<span class="legend-title">Teams</span>
+<label class="check"><input type="checkbox" data-layer="teams" data-prog="fll" checked><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="6" class="team team-fll"></circle></svg>FLL</label>
+<label class="check"><input type="checkbox" data-layer="teams" data-prog="ftc" checked><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="6" class="team team-ftc"></circle></svg>FTC</label>
+<label class="check"><input type="checkbox" data-layer="teams" data-prog="frc" checked><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="6" class="team team-frc"></circle></svg>FRC</label>
 </div>
-<p class="note">Thick black lines separate regions. Two shades of one color are two areas of the same region. Zoom with the buttons or by pinching with two fingers; drag to move the map when zoomed in. To go back, use the trail at the top left of the map, press Esc, or click outside the state.</p>
+<div class="legend-row" role="group" aria-label="Upcoming events shown on the map">
+<span class="legend-title">Events</span>
+<label class="check"><input type="checkbox" data-layer="events" data-prog="fll" checked><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M1.5,1.5h9v9h-9z" class="pin pin-fll"></path></svg>FLL</label>
+<label class="check"><input type="checkbox" data-layer="events" data-prog="ftc" checked><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,0.5l5.5,5.5 -5.5,5.5 -5.5,-5.5z" class="pin pin-ftc"></path></svg>FTC</label>
+<label class="check"><input type="checkbox" data-layer="events" data-prog="frc" checked><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6,1l5,10 -10,0z" class="pin pin-frc"></path></svg>FRC</label>
+<label class="check"><input type="checkbox" data-layer="events" data-prog="other" checked><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" class="pin pin-other"></circle></svg>Other</label>
+</div>
+</div>
+<p class="note">Team circles mark the city, not an address, and grow with the number of teams there. Thick black lines separate regions. Two shades of one color are two areas of the same region. Zoom with the buttons or by pinching with two fingers; drag to move the map when zoomed in. To go back, use the trail at the top left of the map, press Esc, or click outside the state.</p>
 </section>
 <section class="panel" id="panel" aria-live="polite"><p class="note">Loading map data.</p></section>
 </main>
 <script src="config.js"></script>
-<script type="module" src="app.js?v=5"></script>
+<script type="module" src="app.js?v=6"></script>
 </body>
 </html>

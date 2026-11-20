@@ -8,6 +8,7 @@
 // repository is public.
 import { readFile, writeFile, stat } from 'node:fs/promises';
 import { parseCsv } from './lib/csv.mjs';
+import { locateCounty } from './lib/geo.mjs';
 
 const root = new URL('..', import.meta.url);
 const readJson = async (p) => JSON.parse(await readFile(new URL(p, root), 'utf8'));
@@ -51,6 +52,9 @@ if (!counted.length || !inSeason) {
   throw new Error(`This report does not look like the ${settings.season.label} season. It has secured teams for: ${seasons.join(', ') || 'no season'}. Set "season" in config/settings.json to match.`);
 }
 
+const cityKey = (s) => s.toLowerCase().replace(/,\s*wi(sconsin)?$/i, '').replace(/\s+/g, ' ').trim();
+const titleCase = (s) => s.replace(/\b[a-z]/g, (c) => c.toUpperCase());
+const places = new Map(); // "city|county" -> counts; the finest location that is ever written out
 const counties = {};
 const unplaced = { fll: 0, ftc: 0, frc: 0 };
 const unplacedCities = new Set();
@@ -74,7 +78,53 @@ for (const r of counted) {
   }
   counties[county] ??= { fll: 0, ftc: 0, frc: 0 };
   counties[county][program]++;
+  const city = cityKey(r['team city']);
+  if (city) {
+    const key = `${city}|${county}`;
+    if (!places.has(key)) places.set(key, { city, county, fll: 0, ftc: 0, frc: 0 });
+    places.get(key)[program]++;
+  }
 }
+
+// Where each city is. The coordinates come from the public FIRST team search (it publishes a ZIP code
+// centre for every team), asked only for "all Wisconsin teams": nothing from the report is sent anywhere.
+// A city gets the middle of the points seen for it, rounded to about a kilometre.
+const outlines = await readJson('data/geo/wi-counties.json');
+const seen = new Map();
+try {
+  const year = settings.season.frcYear;
+  for (let y = year - 5; y <= year; y++) {
+    const res = await fetch(`${settings.source.teams}?size=5000&q=${encodeURIComponent(`team_stateprov:WI AND profile_year:${y} AND countryCode:US`)}`, { headers: { accept: 'application/json' } });
+    if (!res.ok) throw new Error(`FIRST search returned ${res.status}`);
+    for (const h of (await res.json()).hits.hits) {
+      const loc = h._source.location?.[0];
+      const county = loc && h._source.team_city ? locateCounty(outlines, loc.lon, loc.lat) : null;
+      if (!county) continue;
+      const key = `${cityKey(h._source.team_city)}|${county}`;
+      if (!seen.has(key)) seen.set(key, []);
+      seen.get(key).push([loc.lon, loc.lat]);
+    }
+  }
+} catch (err) {
+  console.log(`Could not look up city locations (${err.message}). Team markers will sit at the middle of each county.`);
+}
+const middle = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
+let approximate = 0;
+for (const p of places.values()) {
+  const pts = seen.get(`${p.city}|${p.county}`);
+  if (pts) {
+    p.lon = middle(pts.map((x) => x[0])).toFixed(2);
+    p.lat = middle(pts.map((x) => x[1])).toFixed(2);
+  } else approximate++;
+}
+const placeLines = [
+  '# Teams per city, made by scripts/import-team-report.mjs. City is the finest location kept: no team numbers,',
+  '# names, schools or addresses. A row with no lon/lat is drawn at the middle of its county.',
+  'city,county,lon,lat,fll,ftc,frc',
+  ...[...places.values()].sort((a, b) => a.county.localeCompare(b.county) || a.city.localeCompare(b.city))
+    .map((p) => `${titleCase(p.city)},${p.county},${p.lon ?? ''},${p.lat ?? ''},${p.fll},${p.ftc},${p.frc}`),
+];
+await writeFile(new URL('data/team-places.csv', root), `${placeLines.join('\n')}\n`);
 
 const reportDate = (await stat(path)).mtime.toLocaleDateString('en-CA');
 const lines = [
@@ -95,4 +145,5 @@ console.log(`Read ${rows.length} rows; counted ${counted.length} active ${settin
 if (outOfState) console.log(`Left out ${outOfState} team(s) not in WI.`);
 if (Object.keys(skipped).length) console.log('Programs not counted:', JSON.stringify(skipped));
 if (unplacedCities.size) console.log(`No county for team(s) in: ${[...unplacedCities].join(', ')}. Add the city to data/city-counties.csv and run this again.`);
-console.log('Wrote data/team-counts.csv. Now run: node scripts/build-data.mjs');
+console.log(`${places.size} cities; ${approximate} could not be located and will be drawn at the middle of their county.`);
+console.log('Wrote data/team-counts.csv and data/team-places.csv. Now run: node scripts/build-data.mjs');

@@ -101,6 +101,22 @@ for (const t of teamHits) {
   else unplaced.push(`${program.toUpperCase()} ${t.team_number_yearly} (${t.team_city ?? '?'}, ${t.team_postalcode ?? '?'})`);
 }
 
+// Team markers: one per city, never finer. Only available when the counts come from the report.
+const places = [];
+if (fromReport) {
+  let placeText = '';
+  try {
+    placeText = await readFile(new URL('data/team-places.csv', root), 'utf8');
+  } catch {}
+  for (const row of parseCsv(placeText)) {
+    const county = findCounty(row.county);
+    if (!county) throw new Error(`data/team-places.csv: unknown county "${row.county}"`);
+    const located = row.lon !== '' && row.lat !== '';
+    const [x, y] = located ? toSvg(map.fit, Number(row.lon), Number(row.lat)).map((n) => Math.round(n)) : [map.counties[county].x, map.counties[county].y];
+    places.push({ city: row.city, county, x, y, fll: Number(row.fll || 0), ftc: Number(row.ftc || 0), frc: Number(row.frc || 0) });
+  }
+}
+
 // ---- Events ------------------------------------------------------------
 const today = new Date().toISOString().slice(0, 10);
 const thisYear = Number(today.slice(0, 4));
@@ -180,7 +196,7 @@ if (!force) {
   }
 }
 
-const data = { season: settings.season, teams, totals, counties, events, goals, champions };
+const data = { season: settings.season, teams, totals, counties, places, events, goals, champions };
 const same = previous && JSON.stringify({ ...previous, generated: undefined }) === JSON.stringify({ ...data, generated: undefined });
 if (!same) await writeFile(new URL('site/data/data.json', root), JSON.stringify({ generated: new Date().toISOString(), ...data }));
 

@@ -11,7 +11,7 @@ const mapEl = document.getElementById('map');
 const crumbs = document.getElementById('crumbs');
 const panel = document.getElementById('panel');
 const params = new URLSearchParams(location.search);
-const state = { region: null, county: null, view: 'overview', prog: 'all', pins: true, sending: false };
+const state = { region: null, county: null, view: 'overview', prog: 'all', sending: false, layers: { teams: { fll: true, ftc: true, frc: true }, events: { fll: true, ftc: true, frc: true, other: true } } };
 let map;
 let data;
 let turnstileId = null;
@@ -64,24 +64,34 @@ function drawMap() {
 
 // Marker shapes are drawn around 0,0 and offset from each other so programs at one venue do not hide each other.
 const PIN = {
-  fll: '<circle class="pin pin-fll" cx="-4" cy="0" r="4"></circle>',
+  fll: '<path class="pin pin-fll" d="M-8,-4h8v8h-8z"></path>',
   ftc: '<path class="pin pin-ftc" d="M4,-5l5,5 -5,5 -5,-5z"></path>',
   frc: '<path class="pin pin-frc" d="M0,-11l5,9 -10,0z"></path>',
   other: '<circle class="pin pin-other" cx="0" cy="6" r="3.5"></circle>',
 };
+const TEAM_SHIFT = { fll: -1, ftc: 0, frc: 1 }; // programs in one city sit side by side
 function drawPins() {
   const seen = new Set();
   const out = [];
   const s = zoomLevel() ** -0.6; // markers grow a little when zoomed in, not in step with the map
   const cell = 5 * s;
-  if (state.pins) {
-    for (const e of upcoming()) {
-      if (e.x == null || !shows(e)) continue;
-      const key = `${e.program}:${Math.round(e.x / cell)}:${Math.round(e.y / cell)}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(`<g transform="translate(${e.x},${e.y}) scale(${s.toFixed(3)})">${PIN[e.program] ?? PIN.other}</g>`);
+  // Teams: one translucent circle per city and program, sized by the number of teams. Biggest first so small ones stay visible.
+  const circles = [];
+  for (const place of data.places ?? []) {
+    for (const p of PROGRAMS) {
+      const n = place[p.id];
+      if (n > 0 && state.layers.teams[p.id]) circles.push({ p: p.id, n, x: place.x + TEAM_SHIFT[p.id] * 4 * s, y: place.y });
     }
+  }
+  circles.sort((a, b) => b.n - a.n);
+  for (const c of circles) out.push(`<circle class="team team-${c.p}" cx="${c.x.toFixed(1)}" cy="${c.y}" r="${((2 + 1.6 * Math.sqrt(c.n)) * s).toFixed(2)}"></circle>`);
+  for (const e of upcoming()) {
+    const kind = PIN[e.program] ? e.program : 'other';
+    if (e.x == null || !shows(e) || !state.layers.events[kind]) continue;
+    const key = `${kind}:${Math.round(e.x / cell)}:${Math.round(e.y / cell)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(`<g transform="translate(${e.x},${e.y}) scale(${s.toFixed(3)})">${PIN[kind]}</g>`);
   }
   document.getElementById('pins').innerHTML = out.join('');
 }
@@ -269,6 +279,12 @@ function events(r) {
     <div class="events">${eventGroups(upcoming().filter((e) => e.region === r.id)) || '<p class="empty">No upcoming events are listed here for this region yet.</p>'}</div>`;
 }
 
+function cityTable(c) {
+  const rows = (data.places ?? []).filter((p) => p.county === c).sort((a, b) => a.city.localeCompare(b.city));
+  if (!rows.length) return '';
+  return `<div class="table">${tableHead('Area').replace('Area', 'City')}${rows.map((p) => `<div class="row row-item no-arrow"><span class="row-name"><span>${esc(p.city)}</span></span>${PROGRAMS.map((x) => `<span class="num">${p[x.id]}</span>`).join('')}</div>`).join('')}</div>`;
+}
+
 function county(r) {
   const c = state.county;
   const n = data.counties[c] ?? {};
@@ -281,6 +297,7 @@ function county(r) {
     </div>
     <div class="tiles">${PROGRAMS.map((p) => `<div class="tile ${p.id}"><div class="tile-figure">${n[p.id] ?? 0}</div><div class="tile-caption">${p.label} teams</div></div>`).join('')}</div>
     <p class="note">Goals are set for the whole region, not for single counties.</p>
+    ${cityTable(c)}
     <div class="events"><div class="kicker">Upcoming events in ${esc(c)} County</div>${eventGroups(upcoming().filter((e) => e.county === c)) || '<p class="empty">No upcoming events are listed in this county yet.</p>'}</div>
     ${championCard(r)}`;
 }
@@ -531,8 +548,10 @@ mapEl.addEventListener('keydown', (ev) => {
     openRegion(g.dataset.region);
   }
 });
-document.getElementById('pins-toggle').addEventListener('change', (ev) => {
-  state.pins = ev.target.checked;
+document.getElementById('legend').addEventListener('change', (ev) => {
+  const { layer, prog } = ev.target.dataset;
+  if (!layer) return;
+  state.layers[layer][prog] = ev.target.checked;
   drawPins();
 });
 

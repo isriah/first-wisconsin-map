@@ -1,0 +1,128 @@
+# Teams per city, made by scripts/import-team-report.mjs. City is the finest location kept: no team numbers,
+# names, schools or addresses. A row with no lon/lat is drawn at the middle of its county.
+city,county,lon,lat,fll,ftc,frc
+De Pere,Brown,-88.07,44.43,12,2,1
+Green Bay,Brown,-87.97,44.51,15,3,1
+New Holstein,Calumet,,,0,1,0
+Bloomer,Chippewa,-91.48,45.10,0,0,1
+Chippewa Falls,Chippewa,-91.40,45.03,0,2,1
+New Auburn,Chippewa,-91.47,45.25,0,0,1
+Columbus,Columbia,-89.03,43.34,0,1,0
+Seneca,Crawford,,,0,3,0
+Wauzeka,Crawford,,,0,2,0
+Cross Plains,Dane,-89.64,43.12,2,0,0
+Dane,Dane,-89.53,43.24,1,0,0
+Madison,Dane,-89.44,43.08,18,7,1
+Middleton,Dane,-89.52,43.12,15,6,2
+Monona,Dane,-89.31,43.07,1,0,0
+Oregon,Dane,-89.39,42.93,7,1,1
+Stoughton,Dane,-89.21,42.93,2,0,0
+Sun Prairie,Dane,-89.22,43.19,1,1,1
+Verona,Dane,-89.57,42.99,15,1,0
+Waunakee,Dane,-89.45,43.18,8,0,0
+Beaver Dam,Dodge,-88.84,43.46,3,2,0
+Juneau,Dodge,-88.68,43.40,1,1,0
+Randolph,Dodge,-89.00,43.54,1,0,0
+Sturgeon Bay,Door,,,0,1,0
+Superior,Douglas,-92.07,46.71,0,0,1
+Menomonie,Dunn,-91.92,44.88,3,1,1
+Eau Claire,Eau Claire,-91.48,44.79,4,0,2
+Campbellsport,Fond du Lac,-88.28,43.61,2,0,0
+Fond Du Lac,Fond du Lac,-88.43,43.78,1,1,1
+Ripon,Fond du Lac,-88.84,43.85,1,0,1
+Cuba City,Grant,-90.51,42.60,3,1,0
+Hazel Green,Grant,-90.51,42.54,2,1,0
+Platteville,Grant,-90.50,42.75,2,0,1
+New Glarus,Green,-89.64,42.81,3,0,0
+Mineral Point,Iowa,-90.18,42.86,0,1,0
+Fort Atkinson,Jefferson,-88.84,42.92,1,0,0
+Waterloo,Jefferson,,,1,0,0
+Kenosha,Kenosha,-87.87,42.65,0,0,1
+Holmen,La Crosse,-91.26,43.96,17,3,1
+La Crosse,La Crosse,-91.22,43.80,0,13,2
+Onalaska,La Crosse,-91.22,43.89,1,2,1
+West Salem,La Crosse,-91.09,43.90,6,1,1
+Merrill,Lincoln,-89.69,45.18,1,0,0
+Kiel,Manitowoc,-87.99,43.93,0,1,1
+Manitowoc,Manitowoc,-87.71,44.10,78,7,3
+Mishicot,Manitowoc,-87.65,44.26,1,0,0
+New Holstein,Manitowoc,-87.88,44.03,1,0,0
+Reedsville,Manitowoc,-87.92,44.15,0,1,0
+Two Rivers,Manitowoc,-87.60,44.18,2,2,1
+Valders,Manitowoc,-87.88,44.03,3,0,0
+Marinette,Marinette,-87.63,45.09,0,0,1
+Bayside,Milwaukee,,,0,1,0
+Brown Deer,Milwaukee,,,0,1,0
+Franklin,Milwaukee,-88.01,42.89,22,0,1
+Glendale,Milwaukee,-87.91,43.15,2,1,0
+Greendale,Milwaukee,-88.00,42.94,7,1,1
+Milwaukee,Milwaukee,-87.91,43.07,77,27,13
+Oak Creek,Milwaukee,-87.90,42.89,13,0,1
+Saint Francis,Milwaukee,-87.87,42.97,2,2,0
+South Milwaukee,Milwaukee,-87.87,42.91,3,1,1
+St. Francis,Milwaukee,-87.87,42.97,0,1,0
+Wauwatosa,Milwaukee,-88.04,43.05,5,0,0
+West Allis,Milwaukee,-88.04,42.99,1,0,0
+Whitefish Bay,Milwaukee,-87.91,43.15,6,4,0
+Sparta,Monroe,-90.81,43.95,0,2,1
+Rhinelander,Oneida,-89.35,45.69,3,1,0
+Three Lakes,Oneida,-89.12,45.81,1,0,0
+Appleton,Outagamie,-88.41,44.28,15,0,1
+Combined Locks,Outagamie,-88.31,44.27,1,0,0
+Freedom,Outagamie,-88.27,44.29,0,0,1
+Greenville,Outagamie,-88.55,44.31,3,0,0
+Hortonville,Outagamie,-88.62,44.32,5,0,0
+Kaukauna,Outagamie,-88.27,44.29,1,0,0
+Cedarburg,Ozaukee,-88.04,43.31,5,0,1
+Grafton,Ozaukee,-87.93,43.33,13,4,0
+Mequon,Ozaukee,-87.95,43.22,11,6,0
+Port Washington,Ozaukee,-87.88,43.42,19,0,0
+Saukville,Ozaukee,-87.97,43.39,10,0,0
+River Falls,Pierce,,,4,0,1
+Frederic,Polk,-92.48,45.70,1,0,0
+Burlington,Racine,-88.27,42.68,2,0,0
+Racine,Racine,-87.83,42.80,16,0,2
+Sturtevant,Racine,-87.92,42.70,6,1,0
+Union Grove,Racine,-88.04,42.70,2,0,0
+Beloit,Rock,-89.09,42.56,8,1,0
+Clinton,Rock,-88.87,42.56,17,1,0
+Janesville,Rock,-89.02,42.68,20,0,1
+Bruce,Rusk,-91.27,45.46,0,0,1
+Tony,Rusk,-90.95,45.57,2,0,0
+Random Lake,Sheboygan,-87.77,43.80,3,1,0
+Sheboygan,Sheboygan,-87.77,43.80,17,7,1
+Sheboygan Falls,Sheboygan,-87.82,43.73,1,0,1
+Woodville,St. Croix,-92.29,44.96,2,0,0
+Arcadia,Trempealeau,-91.50,44.25,0,0,1
+Galesville,Trempealeau,,,0,3,0
+Stoddard,Vernon,-91.22,43.66,0,1,0
+Westby,Vernon,-90.86,43.65,0,0,1
+Fontana,Walworth,-88.57,42.54,3,0,0
+Lake Geneva,Walworth,,,1,0,0
+Whitewater,Walworth,-88.73,42.82,5,1,1
+Colgate,Washington,-88.24,43.20,0,1,0
+Germantown,Washington,-88.15,43.22,2,0,1
+Hartford,Washington,-88.36,43.30,6,0,1
+Kewaskum,Washington,-88.20,43.51,1,0,0
+Slinger,Washington,-88.28,43.33,2,0,0
+West Bend,Washington,-88.17,43.39,10,0,1
+Big Bend,Waukesha,-88.22,42.88,1,0,0
+Brookfield,Waukesha,-88.10,43.06,50,8,1
+Elm Grove,Waukesha,-88.09,43.05,2,1,0
+Hartland,Waukesha,-88.35,43.11,15,2,2
+Lannon,Waukesha,-88.17,43.15,1,0,0
+Menomonee Falls,Waukesha,-88.12,43.15,17,0,1
+Merton,Waukesha,-88.31,43.15,1,0,0
+Mukwonago,Waukesha,-88.34,42.87,9,0,1
+Muskego,Waukesha,-88.12,42.89,6,0,1
+New Berlin,Waukesha,-88.10,42.98,7,2,1
+Oconomowoc,Waukesha,-88.48,43.11,3,0,0
+Pewaukee,Waukesha,-88.26,43.08,23,0,1
+Sussex,Waukesha,-88.23,43.15,7,8,1
+Wales,Waukesha,-88.38,43.00,2,3,1
+Waukesha,Waukesha,-88.21,43.01,15,0,1
+Waupaca,Waupaca,-89.08,44.35,4,0,1
+Menasha,Winnebago,-88.43,44.22,1,0,0
+Neenah,Winnebago,-88.49,44.18,10,0,0
+Oshkosh,Winnebago,-88.62,44.02,13,0,1
+Marshfield,Wood,-90.19,44.61,1,0,1

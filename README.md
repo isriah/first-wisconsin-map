@@ -41,14 +41,14 @@ Region ids for the `scope` column: `milwaukee`, `woww`, `southshore`, `nel`, `fo
 
 1. Download the Team Status Report from Tableau as a CSV. Save it outside this folder (for example in Downloads).
 2. Run `node scripts/import-team-report.mjs "C:path	oeport.csv"`, then `node scripts/build-data.mjs`.
-3. Commit `data/team-counts.csv` and `site/data/data.json`.
+3. Commit `data/team-counts.csv`, `data/team-places.csv` and `site/data/data.json`.
 
 ## Team privacy
 
 The report holds personal data: coach names, emails, phone numbers and addresses. This repository and its job logs are public, so:
 
 - Never commit the report. The import script reads it where it is and writes only counts per county.
-- The page shows numbers of teams per county and nothing else about a team: no team numbers, names, schools or addresses, and no team markers on the map.
+- The page shows numbers of teams per county and per city, and nothing else about a team: no team numbers, names, schools or addresses. A team circle on the map sits on the city, never on an address.
 - Do not add team numbers or names to any file here.
 
 ## Preview on your computer
@@ -67,6 +67,8 @@ Other commands: `node scripts/build-data.mjs` refreshes the data now, `node scri
 2. **Cloudflare Worker.** Follow `worker/README.md`. When it is deployed, put its URL (ending in `/contact`) and the Turnstile site key into `site/config.js`, and add the GitHub Pages address to the Worker's `ALLOWED_ORIGINS`.
 3. **Wix, desktop.** In the editor choose Add Elements → Embed Code → Embed a Site, paste the GitHub Pages address, and size the frame to about 1280 × 920. On wide frames the page fills whatever height you give it and the side panel scrolls inside.
 4. **Wix, mobile.** In the mobile editor hide the desktop embed and add a second one about 390 wide and 1700 tall.
+
+Markers: translucent circles are teams (one per city and program, bigger for more teams); the outlined shapes are upcoming events. The checkboxes under the map switch teams and events on or off for each program.
 
 Using the map: the first click opens a region and zooms to it; a click on a county inside the open region opens that county (its team counts and events). The buttons at the top right of the map zoom in, zoom out and show the whole state. With a mouse, drag to move the map when zoomed in, and hold Ctrl while scrolling to zoom. On a touch screen one finger scrolls the page and two fingers move and zoom the map.
 
