@@ -66,10 +66,11 @@ a:hover { color: var(--blue-dark); }
 
 /* Map */
 .county { stroke: #fff; stroke-width: calc(1px * var(--inv)); stroke-linejoin: round; }
-.region.active .county:hover { filter: brightness(1.12); }
+.region.active .county:hover { fill-opacity: 0.75; }
 .county-outline { fill: none; stroke: var(--ink); stroke-width: calc(3.5px * var(--inv)); stroke-linejoin: round; pointer-events: none; }
 .region { cursor: pointer; transition: opacity 0.15s; }
-.region:hover { filter: brightness(1.06); }
+/* Hover lightens by letting the white page show through. CSS filters are avoided here: on a zoomed SVG a filtered group can come out solid black in some browsers. */
+.region:hover .county { fill-opacity: 0.9; }
 .region:focus { outline: none; }
 .region:focus-visible .county { stroke: var(--ink); stroke-width: calc(2px * var(--inv)); }
 .region.dim { opacity: 0.3; }

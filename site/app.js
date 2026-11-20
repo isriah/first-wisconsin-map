@@ -54,7 +54,7 @@ function drawMap() {
     const labels = r.areas.flatMap((a) => a.counties).map((c) => `<text class="county-label" data-short="${esc(map.counties[c].label)}" data-full="${esc(c)}" x="${map.counties[c].x}" y="${map.counties[c].y}">${esc(map.counties[c].label)}</text>`).join('');
     return `<g class="region" data-region="${esc(r.id)}" tabindex="0" role="button" aria-label="${esc(r.name)} region">${areas}${labels}</g>`;
   }).join('');
-  mapEl.innerHTML = `<svg viewBox="${map.viewBox.join(' ')}" role="group" aria-label="Map of Wisconsin counties, colored by region">${groups}<path class="mesh" d="${map.mesh}"></path><path class="county-outline" id="county-outline" d=""></path><g class="pins" id="pins"></g></svg>`;
+  mapEl.innerHTML = `<svg viewBox="${map.viewBox.join(' ')}" role="group" aria-label="Map of Wisconsin counties, colored by region">${groups}<path class="mesh" d="${map.mesh}"></path><path class="county-outline" id="county-outline" fill="none" d=""></path><g class="pins" id="pins"></g></svg>`;
   svg = mapEl.querySelector('svg');
   const [x, y, w, h] = map.viewBox;
   base = { x, y, w, h };
