@@ -30,7 +30,7 @@ Region ids for the `scope` column: `milwaukee`, `woww`, `southshore`, `nel`, `fo
 
 `scripts/build-data.mjs` writes `site/data/data.json` from `data/team-counts.csv` (teams) and the public FIRST event search (events).
 
-- A team counts when the report shows it as Secured (registered and paid) for the season. The county is the one in the report.
+- A team counts when the report marks it Active, whether or not it has paid yet. The county is the one in the report.
 - If `data/team-counts.csv` is deleted, the counts fall back to the public FIRST team search, which places teams by ZIP code.
 - The season is set in `config/settings.json`. FIRST labels seasons differently by program: the 2026-27 school year is `2026` for FLL and FTC and `2027` for FRC.
 - FLL counts Challenge, Explore and Future Edition together.

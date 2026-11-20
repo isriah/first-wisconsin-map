@@ -232,7 +232,7 @@ function overview() {
     ${tiles('state')}
     <div class="table">${tableHead('Region')}${rows}</div>
     <p class="note">${data.teams?.source === 'report'
-      ? `Team counts are teams registered for the ${esc(data.season.label)} season${data.teams.asOf ? `, as of ${fmt(data.teams.asOf, { month: 'short', day: 'numeric', year: 'numeric' })}` : ''}.`
+      ? `Team counts are active teams for the ${esc(data.season.label)} season${data.teams.asOf ? `, as of ${fmt(data.teams.asOf, { month: 'short', day: 'numeric', year: 'numeric' })}` : ''}.`
       : `Team counts come from the <i>FIRST</i> team search for the ${esc(data.season.label)} season.`} FLL counts all <i>FIRST</i> LEGO League divisions together.</p>`;
 }
 

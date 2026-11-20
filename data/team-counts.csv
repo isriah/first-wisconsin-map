@@ -2,41 +2,47 @@
 # Counts only. Never commit the report itself: it holds personal data and this repository is public.
 # season: 2026-27
 # report date: 2026-11-19
-# counted: teams whose Secured Status is "Secured" for the season. FLL is Challenge, Explore and Future Edition together.
+# counted: teams the report marks Active, paid or not. FLL is Challenge, Explore and Future Edition together.
 # The "(unplaced)" row is teams with no usable county; they count toward the state total only.
 county,fll,ftc,frc
-Brown,20,5,2
+Brown,27,5,2
 Calumet,0,1,0
 Chippewa,0,2,3
 Columbia,0,1,0
-Crawford,0,2,0
-Dane,23,9,5
-Dodge,4,1,0
+Crawford,0,5,0
+Dane,70,16,5
+Dodge,5,3,0
 Door,0,1,0
 Douglas,0,0,1
-Dunn,0,0,1
-Eau Claire,2,0,2
-Fond du Lac,2,1,2
-Grant,3,2,1
+Dunn,3,1,1
+Eau Claire,4,0,2
+Fond du Lac,4,1,2
+Grant,7,2,1
 Green,3,0,0
 Iowa,0,1,0
-La Crosse,12,19,4
-Manitowoc,26,10,5
+Jefferson,2,0,0
+Kenosha,0,0,1
+La Crosse,24,19,5
+Lincoln,1,0,0
+Manitowoc,85,11,5
 Marinette,0,0,1
-Milwaukee,47,29,16
+Milwaukee,138,39,17
 Monroe,0,2,1
-Oneida,3,0,0
-Outagamie,13,0,2
-Ozaukee,32,8,1
-Pierce,1,0,1
+Oneida,4,1,0
+Outagamie,25,0,2
+Ozaukee,58,10,1
+Pierce,4,0,1
 Polk,1,0,0
-Racine,7,0,2
-Rock,16,2,1
-Sheboygan,9,6,2
-Trempealeau,0,3,0
+Racine,26,1,2
+Rock,45,2,1
+Rusk,2,0,1
+Sheboygan,21,8,2
+St. Croix,2,0,0
+Trempealeau,0,3,1
 Vernon,0,1,1
-Walworth,6,1,1
-Washington,12,0,2
-Waukesha,72,15,9
-Waupaca,0,0,1
-Winnebago,11,0,1
+Walworth,9,1,1
+Washington,21,1,3
+Waukesha,159,24,11
+Waupaca,4,0,1
+Winnebago,24,0,1
+Wood,1,0,1

@@ -31,7 +31,7 @@ const text = bytes[0] === 0xff && bytes[1] === 0xfe ? bytes.toString('utf16le') 
 const firstLine = text.slice(0, text.indexOf('\n'));
 const rows = parseCsv(text, firstLine.includes('\t') ? '\t' : ',');
 
-const need = ['secured status', 'most recent season secured', 'program', 'team state province', 'team county', 'team city'];
+const need = ['active team', 'secured status', 'most recent season secured', 'program', 'team state province', 'team county', 'team city'];
 const missing = need.filter((c) => !(c in (rows[0] ?? {})));
 if (missing.length) throw new Error(`The report is missing these columns: ${missing.join(', ')}`);
 
@@ -42,11 +42,13 @@ const seasonLabel = (s) => {
 };
 const programOf = (p) => (/^FLL/i.test(p) ? 'fll' : /^FTC/i.test(p) ? 'ftc' : /^FRC/i.test(p) ? 'frc' : null);
 
-// A team counts when it is secured (registered and paid) for the season in config/settings.json.
-const counted = rows.filter((r) => r['secured status'] === 'Secured' && seasonLabel(r['most recent season secured']) === settings.season.label);
-if (!counted.length) {
+// A team counts when the report marks it Active, whether or not it has paid yet.
+// The report covers one season; the secured teams tell us which, and it must match config/settings.json.
+const counted = rows.filter((r) => r['active team'] === 'Active');
+const inSeason = rows.some((r) => r['secured status'] === 'Secured' && seasonLabel(r['most recent season secured']) === settings.season.label);
+if (!counted.length || !inSeason) {
   const seasons = [...new Set(rows.filter((r) => r['secured status'] === 'Secured').map((r) => seasonLabel(r['most recent season secured'])))].filter(Boolean);
-  throw new Error(`No secured teams for ${settings.season.label} in this report. It has secured teams for: ${seasons.join(', ') || 'no season'}. Set "season" in config/settings.json to match.`);
+  throw new Error(`This report does not look like the ${settings.season.label} season. It has secured teams for: ${seasons.join(', ') || 'no season'}. Set "season" in config/settings.json to match.`);
 }
 
 const counties = {};
@@ -80,7 +82,7 @@ const lines = [
   '# Counts only. Never commit the report itself: it holds personal data and this repository is public.',
   `# season: ${settings.season.label}`,
   `# report date: ${reportDate}`,
-  '# counted: teams whose Secured Status is "Secured" for the season. FLL is Challenge, Explore and Future Edition together.',
+  '# counted: teams the report marks Active, paid or not. FLL is Challenge, Explore and Future Edition together.',
   '# The "(unplaced)" row is teams with no usable county; they count toward the state total only.',
   'county,fll,ftc,frc',
   ...Object.keys(counties).sort().map((c) => `${c},${counties[c].fll},${counties[c].ftc},${counties[c].frc}`),
@@ -89,7 +91,7 @@ if (unplaced.fll + unplaced.ftc + unplaced.frc) lines.push(`(unplaced),${unplace
 await writeFile(new URL('data/team-counts.csv', root), `${lines.join('\n')}\n`);
 
 const total = (p) => Object.values(counties).reduce((n, c) => n + c[p], 0) + unplaced[p];
-console.log(`Read ${rows.length} rows; counted ${counted.length} secured ${settings.season.label} teams: FLL ${total('fll')}, FTC ${total('ftc')}, FRC ${total('frc')} in ${Object.keys(counties).length} counties.`);
+console.log(`Read ${rows.length} rows; counted ${counted.length} active ${settings.season.label} teams: FLL ${total('fll')}, FTC ${total('ftc')}, FRC ${total('frc')} in ${Object.keys(counties).length} counties.`);
 if (outOfState) console.log(`Left out ${outOfState} team(s) not in WI.`);
 if (Object.keys(skipped).length) console.log('Programs not counted:', JSON.stringify(skipped));
 if (unplacedCities.size) console.log(`No county for team(s) in: ${[...unplacedCities].join(', ')}. Add the city to data/city-counties.csv and run this again.`);
